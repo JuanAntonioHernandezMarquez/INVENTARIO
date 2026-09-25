@@ -10,6 +10,12 @@
     <script src="https://unpkg.com/html5-qrcode"></script>
     <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Forzar mayúsculas en todos los inputs de texto */
+        input[type="text"] {
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen pb-20">
 
@@ -63,42 +69,42 @@
         <!-- Formulario de Registro -->
         <div class="bg-white rounded-2xl shadow-md p-4">
             <h2 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Datos del Equipo
+                <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Datos del Equipo (Todo en Mayúsculas)
             </h2>
             <form id="equipmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Equipo</label>
-                    <input type="text" id="equipo" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. Laptop, PC, Impresora">
+                    <input type="text" id="equipo" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. LAPTOP, PC">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Marca</label>
-                    <input type="text" id="marca" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. HP, Dell, Lenovo">
+                    <input type="text" id="marca" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. HP, DELL">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Modelo</label>
-                    <input type="text" id="modelo" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. Latitude 3420">
+                    <input type="text" id="modelo" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. LATITUDE 3420">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">Hostname</label>
-                    <input type="text" id="hostname" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. PC-OFFICE-01">
+                    <input type="text" id="hostname" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. PC-OFFICE-01">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1">MAC Address</label>
-                    <input type="text" id="mac" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Ej. 00:1A:2B:3C:4D:5E">
+                    <input type="text" id="mac" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. 00:1A:2B:3C:4D:5E">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-600 mb-1 text-indigo-700 flex justify-between">
                         <span>N° Serie (Escaneable)</span>
                         <i class="fa-solid fa-barcode"></i>
                     </label>
-                    <input type="text" id="serie" required class="w-full p-2.5 border-2 border-indigo-200 bg-indigo-50/30 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Escanea o escribe serie">
+                    <input type="text" id="serie" required class="w-full p-2.5 border-2 border-indigo-200 bg-indigo-50/30 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ESCANEA O ESCRIBE">
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-xs font-semibold text-gray-600 mb-1 text-indigo-700 flex justify-between">
                         <span>Código SIAF (Escaneable)</span>
                         <i class="fa-solid fa-barcode"></i>
                     </label>
-                    <input type="text" id="siaf" required class="w-full p-2.5 border-2 border-indigo-200 bg-indigo-50/30 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Escanea o escribe SIAF">
+                    <input type="text" id="siaf" required class="w-full p-2.5 border-2 border-indigo-200 bg-indigo-50/30 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ESCANEA O ESCRIBE">
                 </div>
 
                 <div class="md:col-span-2 pt-2">
@@ -117,7 +123,7 @@
                 </h2>
                 <div class="flex gap-2">
                     <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-excel"></i> Exportar CSV
+                        <i class="fa-solid fa-file-excel"></i> Exportar Excel (CSV)
                     </button>
                     <button onclick="clearAllData()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-trash-can"></i> Limpiar
@@ -125,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- Vista Adaptable (Tabla en PC / Tarjetas en Móvil) -->
+            <!-- Tabla Adaptable -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
@@ -139,7 +145,7 @@
                         </tr>
                     </thead>
                     <tbody id="inventoryTableBody" class="divide-y text-sm text-gray-700">
-                        <!-- Los datos se cargan dinámicamente aquí -->
+                        <!-- Datos cargados dinámicamente -->
                     </tbody>
                 </table>
             </div>
@@ -151,14 +157,20 @@
 
     </main>
 
-    <!-- Script de Lógica de la App -->
+    <!-- Script de Lógica -->
     <script>
         let html5QrCode = null;
         let isScanning = false;
         let inventory = JSON.parse(localStorage.getItem('inventory_data')) || [];
 
-        // Inicializar vista
         renderTable();
+
+        // Forzar mayúsculas automáticamente en tiempo real mientras se escribe
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
 
         // Manejar Escáner de Cámara
         async function toggleScanner() {
@@ -176,14 +188,12 @@
                         { facingMode: "environment" },
                         { fps: 10, qrbox: { width: 250, height: 100 } },
                         (decodedText) => {
-                            handleSuccessfulScan(decodedText);
+                            handleSuccessfulScan(decodedText.toUpperCase());
                         },
-                        (errorMessage) => {
-                            // Ignorar errores menores de cuadro por segundo sin lectura
-                        }
+                        (errorMessage) => {}
                     );
                 } catch (err) {
-                    alert("No se pudo iniciar la cámara. Verifica los permisos o el protocolo HTTPS.");
+                    alert("No se pudo iniciar la cámara. Verifica los permisos o el protocolo.");
                     toggleScanner();
                 }
             } else {
@@ -197,30 +207,25 @@
             }
         }
 
-        // Al escanear con éxito un código de barras
+        // Al escanear con éxito
         function handleSuccessfulScan(code) {
-            // Obtener el campo radio seleccionado (serie o siaf)
             const selectedTarget = document.querySelector('input[name="targetField"]:checked').value;
             const targetInput = document.getElementById(selectedTarget);
             
             if (targetInput) {
-                targetInput.value = code;
+                targetInput.value = code.toUpperCase();
                 
-                // Efecto visual de destello en el input rellenado
                 targetInput.classList.add('bg-green-100', 'border-green-500');
                 setTimeout(() => {
                     targetInput.classList.remove('bg-green-100', 'border-green-500');
                 }, 1000);
 
-                // Vibración táctil si el celular lo soporta
                 if (navigator.vibrate) navigator.vibrate(150);
-
-                // Reproducir bip corto de éxito (Web Audio API)
                 playBeep();
             }
         }
 
-        // Generar sonido corto de alerta
+        // Audio de éxito
         function playBeep() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -236,25 +241,23 @@
             } catch(e) {}
         }
 
-        // Agregar registro desde el formulario
+        // Agregar registro
         document.getElementById('equipmentForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
             const newItem = {
                 id: Date.now(),
-                equipo: document.getElementById('equipo').value.trim(),
-                marca: document.getElementById('marca').value.trim(),
-                modelo: document.getElementById('modelo').value.trim(),
-                hostname: document.getElementById('hostname').value.trim(),
-                mac: document.getElementById('mac').value.trim(),
-                serie: document.getElementById('serie').value.trim(),
-                siaf: document.getElementById('siaf').value.trim()
+                equipo: document.getElementById('equipo').value.trim().toUpperCase(),
+                marca: document.getElementById('marca').value.trim().toUpperCase(),
+                modelo: document.getElementById('modelo').value.trim().toUpperCase(),
+                hostname: document.getElementById('hostname').value.trim().toUpperCase(),
+                mac: document.getElementById('mac').value.trim().toUpperCase(),
+                serie: document.getElementById('serie').value.trim().toUpperCase(),
+                siaf: document.getElementById('siaf').value.trim().toUpperCase()
             };
 
-            inventory.unshift(newItem); // Agregar al inicio
+            inventory.unshift(newItem);
             saveAndRefresh();
-            
-            // Resetear formulario pero mantener activo el escáner si estaba abierto
             document.getElementById('equipmentForm').reset();
         });
 
@@ -263,7 +266,7 @@
             renderTable();
         }
 
-        // Renderizar elementos en la tabla
+        // Renderizar tabla
         function renderTable() {
             const tbody = document.getElementById('inventoryTableBody');
             const emptyState = document.getElementById('emptyState');
@@ -300,7 +303,6 @@
             `).join('');
         }
 
-        // Eliminar un elemento individual
         function deleteItem(id) {
             if (confirm("¿Estás seguro de eliminar este equipo?")) {
                 inventory = inventory.filter(item => item.id !== id);
@@ -308,7 +310,6 @@
             }
         }
 
-        // Limpiar toda la tabla
         function clearAllData() {
             if (confirm("¿Deseas borrar todo el inventario guardado?")) {
                 inventory = [];
@@ -316,14 +317,13 @@
             }
         }
 
-        // Exportar a CSV (compatible con Excel)
         function exportToCSV() {
             if (inventory.length === 0) {
                 alert("No hay datos para exportar.");
                 return;
             }
 
-            let csvContent = "\uFEFFEquipo,Marca,Modelo,Hostname,MAC,Serie,SIAF\n";
+            let csvContent = "\uFEFFEQUIPO,MARCA,MODELO,HOSTNAME,MAC,SERIE,SIAF\n";
             inventory.forEach(item => {
                 csvContent += `"${item.equipo}","${item.marca}","${item.modelo}","${item.hostname}","${item.mac}","${item.serie}","${item.siaf}"\n`;
             });
