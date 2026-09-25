@@ -121,9 +121,12 @@
                 <h2 class="font-bold text-gray-700 flex items-center gap-2">
                     <i class="fa-solid fa-table text-indigo-600"></i> Equipos Registrados
                 </h2>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <button onclick="exportToExcelTable()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-excel"></i> Exportar a Tabla Excel
+                        <i class="fa-solid fa-file-excel"></i> Excel (.xls)
+                    </button>
+                    <button onclick="exportToTXT()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-lines"></i> Texto (.txt)
                     </button>
                     <button onclick="clearAllData()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-trash-can"></i> Limpiar
@@ -317,7 +320,7 @@
             }
         }
 
-        // Exportar como Tabla de Excel real (formato HTML Table con celdas de texto)
+        // Exportar como Tabla de Excel real (.xls)
         function exportToExcelTable() {
             if (inventory.length === 0) {
                 alert("No hay datos para exportar.");
@@ -376,6 +379,30 @@
             const a = document.createElement('a');
             a.href = url;
             a.download = `inventario_equipos_${new Date().toISOString().slice(0,10)}.xls`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Exportar como Archivo de Texto (.txt) ordenado en formato de tabla de texto
+        function exportToTXT() {
+            if (inventory.length === 0) {
+                alert("No hay datos para exportar.");
+                return;
+            }
+
+            // Encabezados tabulados o separados por espacios limpios
+            let txtContent = "EQUIPO\tMARCA\tMODELO\tHOSTNAME\tMAC\tSERIE\tSIAF\n";
+            
+            inventory.forEach(item => {
+                txtContent += `${item.equipo}\t${item.marca}\t${item.modelo}\t${item.hostname}\t${item.mac}\t${item.serie}\t${item.siaf}\n`;
+            });
+
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventario_equipos_${new Date().toISOString().slice(0,10)}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
