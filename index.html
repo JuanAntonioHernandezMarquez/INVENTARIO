@@ -122,8 +122,8 @@
                     <i class="fa-solid fa-table text-indigo-600"></i> Equipos Registrados
                 </h2>
                 <div class="flex gap-2">
-                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-excel"></i> Exportar Excel (CSV)
+                    <button onclick="exportToExcelTable()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-excel"></i> Exportar a Tabla Excel
                     </button>
                     <button onclick="clearAllData()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-trash-can"></i> Limpiar
@@ -317,22 +317,65 @@
             }
         }
 
-        function exportToCSV() {
+        // Exportar como Tabla de Excel real (formato HTML Table con celdas de texto)
+        function exportToExcelTable() {
             if (inventory.length === 0) {
                 alert("No hay datos para exportar.");
                 return;
             }
 
-            let csvContent = "\uFEFFEQUIPO,MARCA,MODELO,HOSTNAME,MAC,SERIE,SIAF\n";
+            let htmlContent = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head>
+                    <meta charset="UTF-8">
+                    <style>
+                        table { border-collapse: collapse; width: 100%; }
+                        th, td { border: 1px solid black; padding: 8px; text-align: left; mso-number-format:"\\@"; }
+                        th { background-color: #4F46E5; color: white; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>EQUIPO</th>
+                                <th>MARCA</th>
+                                <th>MODELO</th>
+                                <th>HOSTNAME</th>
+                                <th>MAC</th>
+                                <th>SERIE</th>
+                                <th>SIAF</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
             inventory.forEach(item => {
-                csvContent += `"${item.equipo}","${item.marca}","${item.modelo}","${item.hostname}","${item.mac}","${item.serie}","${item.siaf}"\n`;
+                htmlContent += `
+                    <tr>
+                        <td>${item.equipo}</td>
+                        <td>${item.marca}</td>
+                        <td>${item.modelo}</td>
+                        <td>${item.hostname}</td>
+                        <td>${item.mac}</td>
+                        <td>${item.serie}</td>
+                        <td>${item.siaf}</td>
+                    </tr>
+                `;
             });
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            htmlContent += `
+                        </tbody>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `inventario_equipos_${new Date().toISOString().slice(0,10)}.csv`;
+            a.download = `inventario_equipos_${new Date().toISOString().slice(0,10)}.xls`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
