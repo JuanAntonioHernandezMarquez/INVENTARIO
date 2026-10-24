@@ -19,7 +19,8 @@
 <div><label class="block text-xs font-semibold mb-1">Equipo</label><input id="c_Equipo" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="EJ. LAPTOP, PC"></div>
 <div><label class="block text-xs font-semibold mb-1">Marca</label><input id="c_Marca" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="EJ. HP, DELL"></div>
 <div><label class="block text-xs font-semibold mb-1">Modelo</label><input id="c_Modelo" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="MODELO DEL EQUIPO"></div>
-<div><label class="block text-xs font-semibold mb-1">Puesto</label><select id="Puesto" required class="w-full p-2.5 border rounded-xl bg-white"><option value="">SELECCIONA UN PUESTO</option><option>CAJA</option><option>BANQUERO</option><option>EJECUTIVO</option><option>GERENCIA</option><option>ADMINISTRATIVO</option><option>OTRO</option></select></div>
+<div><label class="block text-xs font-semibold mb-1">Puesto</label><select id="Puesto" required class="w-full p-2.5 border rounded-xl bg-white"><option value="">SELECCIONA UN PUESTO</option><option>VENTANILLA</option><option>MAI</option><option>PODIO</option><option>PANTALLA VENTANILLA</option><option>PANTALLA EJECUTIVO</option><option>BANQUERO</option><option>DIRECTOR</option><option>JC</option><option>BOVEDA</option><option>PLAYER</option></select></div>
+<div id="puestoNumeroContainer" class="hidden"><label class="block text-xs font-semibold mb-1">Número de puesto / pantalla</label><input id="PuestoNumero" type="number" min="1" step="1" class="w-full p-2.5 border rounded-xl" placeholder="EJ. 1, 2, 3"><p class="text-xs text-gray-500 mt-1">Para ventanilla, banquero y pantallas.</p></div>
 <div><label class="block text-xs font-semibold mb-1">Hostname</label><input id="Hostname" type="text" class="w-full p-2.5 border rounded-xl" placeholder="NOMBRE DEL EQUIPO"></div>
 <div><label class="block text-xs font-semibold mb-1">Dirección MAC</label><input id="MAC" type="text" maxlength="17" class="w-full p-2.5 border rounded-xl font-mono" placeholder="00:1A:2B:3C:4D:5E"><p class="text-xs text-gray-500 mt-1">Se agregan automáticamente los dos puntos cada dos caracteres hexadecimales.</p></div>
 <div class="sm:col-span-2 lg:col-span-3"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl"><i class="fa-solid fa-floppy-disk mr-2"></i>Agregar a la tabla</button></div>
@@ -31,6 +32,14 @@
 let inventory = JSON.parse(localStorage.getItem('inventory_data')) || [];
 let html5QrCode = null, isScanning = false;
 const fields = ['c_Inventario','c_Serie','c_Equipo','c_Marca','c_Modelo','Puesto','Hostname','MAC'];
+const puestosNumerados = ['VENTANILLA','BANQUERO','PANTALLA VENTANILLA','PANTALLA EJECUTIVO'];
+const puestoSelect = document.getElementById('Puesto');
+puestoSelect.addEventListener('change', () => {
+  const show = puestosNumerados.includes(puestoSelect.value);
+  document.getElementById('puestoNumeroContainer').classList.toggle('hidden', !show);
+  document.getElementById('PuestoNumero').required = show;
+  if (!show) document.getElementById('PuestoNumero').value = '';
+});
 // Formatea MAC como XX:XX:XX:XX:XX:XX mientras se escribe o pega.
 function formatMac(value){
   const hex = value.toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,12);
@@ -46,7 +55,7 @@ function renderTable(){
  tbody.innerHTML=inventory.map(item=>`<tr class="hover:bg-gray-50"><td class="p-2.5 font-mono">${esc(item.c_Inventario||item.siaf||'')}</td><td class="p-2.5 font-mono">${esc(item.c_Serie||item.serie||'')}</td><td class="p-2.5">${esc(item.c_Equipo||item.equipo||'')}</td><td class="p-2.5">${esc(item.c_Marca||item.marca||'')}</td><td class="p-2.5">${esc(item.c_Modelo||item.modelo||'')}</td><td class="p-2.5">${esc(item.Puesto||item.puesto||'')}</td><td class="p-2.5">${esc(item.Hostname||item.hostname||'')}</td><td class="p-2.5 font-mono">${esc(item.MAC||item.mac||'')}</td><td class="p-2.5"><button onclick="deleteItem(${Number(item.id)})" class="text-red-600 px-2" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
 }
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-document.getElementById('equipmentForm').addEventListener('submit',e=>{e.preventDefault();const item={id:Date.now()};fields.forEach(f=>item[f]=document.getElementById(f).value.trim().toUpperCase());inventory.unshift(item);persist();e.target.reset();document.getElementById('c_Inventario').focus()});
+document.getElementById('equipmentForm').addEventListener('submit',e=>{e.preventDefault();const item={id:Date.now()};fields.forEach(f=>item[f]=document.getElementById(f).value.trim().toUpperCase());const numero=document.getElementById('PuestoNumero').value.trim();if(puestosNumerados.includes(item.Puesto)&&numero)item.Puesto += ' '+numero;inventory.unshift(item);persist();e.target.reset();document.getElementById('puestoNumeroContainer').classList.add('hidden');document.getElementById('PuestoNumero').required=false;document.getElementById('c_Inventario').focus()});
 async function toggleScanner(){const container=document.getElementById('reader-container'),btn=document.getElementById('camBtnText');if(!isScanning){container.classList.remove('hidden');btn.textContent='Detener cámara';isScanning=true;html5QrCode=new Html5Qrcode('reader');try{await html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:100}},code=>handleSuccessfulScan(code),()=>{});}catch(err){alert('No se pudo abrir la cámara. Permite el acceso y abre la página mediante HTTPS o localhost.');try{await html5QrCode.clear()}catch(_){}isScanning=false;container.classList.add('hidden');btn.textContent='Iniciar cámara'}}else{try{await html5QrCode.stop();await html5QrCode.clear()}catch(_){}isScanning=false;container.classList.add('hidden');btn.textContent='Iniciar cámara'}}
 function handleSuccessfulScan(code){const field=document.querySelector('input[name="targetField"]:checked').value;const input=document.getElementById(field);input.value=code.toUpperCase();input.dispatchEvent(new Event('input'));input.classList.add('bg-green-100','border-green-500');setTimeout(()=>input.classList.remove('bg-green-100','border-green-500'),900);if(navigator.vibrate)navigator.vibrate(120);}
 function deleteItem(id){if(confirm('¿Eliminar este equipo?')){inventory=inventory.filter(x=>Number(x.id)!==id);persist()}}
