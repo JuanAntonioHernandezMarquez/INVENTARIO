@@ -46,7 +46,7 @@ function formatMac(value){
   return hex.match(/.{1,2}/g)?.join(':') || '';
 }
 document.getElementById('MAC').addEventListener('input', e => { const p=e.target.selectionStart; const before=e.target.value; e.target.value=formatMac(before); try { e.target.setSelectionRange(e.target.value.length,e.target.value.length); } catch(_){} });
-document.querySelectorAll('input[type=text]').forEach(el=>el.addEventListener('input',()=>{if(el.id!=='MAC') el.value=el.value.toUpperCase()}));
+document.querySelectorAll('input[type=text]').forEach(el=>el.addEventListener('input',()=>{if(el.id==='MAC') return; const start=el.selectionStart, end=el.selectionEnd; const upper=el.value.toUpperCase(); if(el.value!==upper){el.value=upper; try{el.setSelectionRange(start,end)}catch(_){}}}));
 function persist(){localStorage.setItem('inventory_data',JSON.stringify(inventory));renderTable()}
 function renderTable(){
  const tbody=document.getElementById('inventoryTableBody');
