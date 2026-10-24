@@ -65,3 +65,70 @@ function exportToTXT(){if(!inventory.length)return alert('No hay datos para expo
 function download(content,name,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
 renderTable();
 </script></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Inventario</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>input[type=text]{text-transform:uppercase} th,td{white-space:nowrap}</style>
+</head>
+<body class="bg-gray-100 min-h-screen pb-12">
+<header class="bg-indigo-600 text-white p-4 shadow sticky top-0 z-40"><div class="max-w-6xl mx-auto flex justify-between items-center gap-3"><h1 class="text-lg font-bold"><i class="fa-solid fa-barcode mr-2"></i>Control de Inventario</h1><span id="counter" class="bg-indigo-800 text-xs px-3 py-1 rounded-full">0 registros</span></div></header>
+<main class="max-w-6xl mx-auto p-4 space-y-5">
+<section class="bg-white rounded-2xl shadow p-4"><div class="flex justify-between items-center gap-3 mb-3"><h2 class="font-bold text-gray-700"><i class="fa-solid fa-camera text-indigo-600 mr-2"></i>Escáner de códigos</h2><button id="cameraBtn" onclick="toggleScanner()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm"><i class="fa-solid fa-power-off mr-1"></i><span id="camBtnText">Iniciar cámara</span></button></div><div id="reader-container" class="hidden mb-3"><div id="reader" class="max-w-md"></div><p class="text-xs text-gray-500 mt-2">Se usa la cámara trasera cuando está disponible.</p></div><div class="rounded-xl bg-indigo-50 p-3"><p class="text-xs font-bold text-indigo-900 mb-2">Enviar código escaneado a:</p><div class="flex flex-wrap gap-4"><label class="flex items-center gap-2"><input type="radio" name="targetField" value="c_Serie" checked> Número de serie</label><label class="flex items-center gap-2"><input type="radio" name="targetField" value="c_Inventario"> Código de inventario (SIAF)</label></div><p class="text-xs text-gray-500 mt-2">También puedes usar un lector USB: selecciona el campo y escanea.</p></div></section>
+<section class="bg-white rounded-2xl shadow p-4"><h2 class="font-bold text-gray-700 mb-4"><i class="fa-solid fa-pen-to-square text-indigo-600 mr-2"></i>Datos del equipo</h2>
+<form id="equipmentForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+<div><label class="block text-xs font-semibold mb-1">Código de inventario (SIAF)</label><input id="c_Inventario" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="CÓDIGO SIAF"></div>
+<div><label class="block text-xs font-semibold mb-1">Número de serie</label><input id="c_Serie" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="NÚMERO DE SERIE"></div>
+<div><label class="block text-xs font-semibold mb-1">Equipo</label><input id="c_Equipo" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="EJ. LAPTOP, PC"></div>
+<div><label class="block text-xs font-semibold mb-1">Marca</label><input id="c_Marca" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="EJ. HP, DELL"></div>
+<div><label class="block text-xs font-semibold mb-1">Modelo</label><input id="c_Modelo" type="text" required class="w-full p-2.5 border rounded-xl" placeholder="MODELO DEL EQUIPO"></div>
+<div><label class="block text-xs font-semibold mb-1">Puesto</label><select id="Puesto" required class="w-full p-2.5 border rounded-xl bg-white"><option value="">SELECCIONA UN PUESTO</option><option>VENTANILLA</option><option>MAI</option><option>PODIO</option><option>PANTALLA VENTANILLA</option><option>PANTALLA EJECUTIVO</option><option>BANQUERO</option><option>DIRECTOR</option><option>JC</option><option>BOVEDA</option><option>PLAYER</option></select></div>
+<div id="puestoNumeroContainer" class="hidden"><label class="block text-xs font-semibold mb-1">Número de puesto / pantalla</label><input id="PuestoNumero" type="number" min="1" step="1" class="w-full p-2.5 border rounded-xl" placeholder="EJ. 1, 2, 3"><p class="text-xs text-gray-500 mt-1">Para ventanilla, banquero y pantallas.</p></div>
+<div><label class="block text-xs font-semibold mb-1">Hostname</label><input id="Hostname" type="text" class="w-full p-2.5 border rounded-xl" placeholder="NOMBRE DEL EQUIPO"></div>
+<div><label class="block text-xs font-semibold mb-1">Dirección MAC</label><input id="MAC" type="text" maxlength="17" class="w-full p-2.5 border rounded-xl font-mono" placeholder="00:1A:2B:3C:4D:5E"><p class="text-xs text-gray-500 mt-1">Se agregan automáticamente los dos puntos cada dos caracteres hexadecimales.</p></div>
+<div class="sm:col-span-2 lg:col-span-3"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl"><i class="fa-solid fa-floppy-disk mr-2"></i>Agregar a la tabla</button></div>
+</form></section>
+<section class="bg-white rounded-2xl shadow p-4"><div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4"><h2 class="font-bold text-gray-700"><i class="fa-solid fa-table text-indigo-600 mr-2"></i>Equipos registrados</h2><div class="flex flex-wrap gap-2"><button onclick="exportToExcel()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-file-excel mr-1"></i>Excel (.xls)</button><button onclick="exportToTXT()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-file-lines mr-1"></i>Texto (.txt)</button><button onclick="clearAllData()" class="bg-red-100 text-red-700 px-3 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-trash mr-1"></i>Limpiar</button></div></div>
+<div class="overflow-x-auto"><table class="w-full text-left border-collapse text-sm"><thead class="bg-gray-50 text-xs uppercase text-gray-600"><tr><th class="p-2.5">c_Inventario</th><th class="p-2.5">c_Serie</th><th class="p-2.5">c_Equipo</th><th class="p-2.5">c_Marca</th><th class="p-2.5">c_Modelo</th><th class="p-2.5">Puesto</th><th class="p-2.5">Hostname</th><th class="p-2.5">MAC</th><th class="p-2.5">Acciones</th></tr></thead><tbody id="inventoryTableBody" class="divide-y"></tbody></table></div><div id="emptyState" class="text-center py-8 text-gray-400 text-sm"><i class="fa-solid fa-box-open text-3xl mb-2 block"></i>No hay equipos registrados todavía.</div></section>
+</main>
+<script>
+let inventory = JSON.parse(localStorage.getItem('inventory_data')) || [];
+let html5QrCode = null, isScanning = false;
+const fields = ['c_Inventario','c_Serie','c_Equipo','c_Marca','c_Modelo','Puesto','Hostname','MAC'];
+const puestosNumerados = ['VENTANILLA','BANQUERO','PANTALLA VENTANILLA','PANTALLA EJECUTIVO'];
+const puestoSelect = document.getElementById('Puesto');
+puestoSelect.addEventListener('change', () => {
+  const show = puestosNumerados.includes(puestoSelect.value);
+  document.getElementById('puestoNumeroContainer').classList.toggle('hidden', !show);
+  document.getElementById('PuestoNumero').required = show;
+  if (!show) document.getElementById('PuestoNumero').value = '';
+});
+// Formatea MAC como XX:XX:XX:XX:XX:XX mientras se escribe o pega.
+function formatMac(value){
+  const hex = value.toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,12);
+  return hex.match(/.{1,2}/g)?.join(':') || '';
+}
+document.getElementById('MAC').addEventListener('input', e => { const p=e.target.selectionStart; const before=e.target.value; e.target.value=formatMac(before); try { e.target.setSelectionRange(e.target.value.length,e.target.value.length); } catch(_){} });
+document.querySelectorAll('input[type=text]').forEach(el=>el.addEventListener('input',()=>{if(el.id!=='MAC') el.value=el.value.toUpperCase()}));
+function persist(){localStorage.setItem('inventory_data',JSON.stringify(inventory));renderTable()}
+function renderTable(){
+ const tbody=document.getElementById('inventoryTableBody');
+ document.getElementById('counter').textContent=inventory.length+' registros';
+ document.getElementById('emptyState').classList.toggle('hidden',inventory.length>0);
+ tbody.innerHTML=inventory.map(item=>`<tr class="hover:bg-gray-50"><td class="p-2.5 font-mono">${esc(item.c_Inventario||item.siaf||'')}</td><td class="p-2.5 font-mono">${esc(item.c_Serie||item.serie||'')}</td><td class="p-2.5">${esc(item.c_Equipo||item.equipo||'')}</td><td class="p-2.5">${esc(item.c_Marca||item.marca||'')}</td><td class="p-2.5">${esc(item.c_Modelo||item.modelo||'')}</td><td class="p-2.5">${esc(item.Puesto||item.puesto||'')}</td><td class="p-2.5">${esc(item.Hostname||item.hostname||'')}</td><td class="p-2.5 font-mono">${esc(item.MAC||item.mac||'')}</td><td class="p-2.5"><button onclick="deleteItem(${Number(item.id)})" class="text-red-600 px-2" title="Eliminar"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+document.getElementById('equipmentForm').addEventListener('submit',e=>{e.preventDefault();const item={id:Date.now()};fields.forEach(f=>item[f]=document.getElementById(f).value.trim().toUpperCase());const numero=document.getElementById('PuestoNumero').value.trim();if(puestosNumerados.includes(item.Puesto)&&numero)item.Puesto += ' '+numero;inventory.unshift(item);persist();e.target.reset();document.getElementById('puestoNumeroContainer').classList.add('hidden');document.getElementById('PuestoNumero').required=false;document.getElementById('c_Inventario').focus()});
+async function toggleScanner(){const container=document.getElementById('reader-container'),btn=document.getElementById('camBtnText');if(!isScanning){container.classList.remove('hidden');btn.textContent='Detener cámara';isScanning=true;html5QrCode=new Html5Qrcode('reader');try{await html5QrCode.start({facingMode:'environment'},{fps:10,qrbox:{width:250,height:100}},code=>handleSuccessfulScan(code),()=>{});}catch(err){alert('No se pudo abrir la cámara. Permite el acceso y abre la página mediante HTTPS o localhost.');try{await html5QrCode.clear()}catch(_){}isScanning=false;container.classList.add('hidden');btn.textContent='Iniciar cámara'}}else{try{await html5QrCode.stop();await html5QrCode.clear()}catch(_){}isScanning=false;container.classList.add('hidden');btn.textContent='Iniciar cámara'}}
+function handleSuccessfulScan(code){const field=document.querySelector('input[name="targetField"]:checked').value;const input=document.getElementById(field);input.value=code.toUpperCase();input.dispatchEvent(new Event('input'));input.classList.add('bg-green-100','border-green-500');setTimeout(()=>input.classList.remove('bg-green-100','border-green-500'),900);if(navigator.vibrate)navigator.vibrate(120);}
+function deleteItem(id){if(confirm('¿Eliminar este equipo?')){inventory=inventory.filter(x=>Number(x.id)!==id);persist()}}
+function clearAllData(){if(confirm('¿Deseas borrar todo el inventario guardado en este navegador?')){inventory=[];persist()}}
+function exportToExcel(){if(!inventory.length)return alert('No hay datos para exportar.');const headers=['c_Inventario','c_Serie','c_Equipo','c_Marca','c_Modelo','Puesto','Hostname','MAC'];const rows=inventory.map(i=>headers.map(k=>esc(i[k]??i[({c_Inventario:'siaf',c_Serie:'serie',c_Equipo:'equipo',c_Marca:'marca',c_Modelo:'modelo',Puesto:'puesto',Hostname:'hostname',MAC:'mac'})[k]]??'')));const html=`<html><head><meta charset="UTF-8"></head><body><table border="1"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;download(html,'inventario_equipos.xls','application/vnd.ms-excel;charset=utf-8;')}
+function exportToTXT(){if(!inventory.length)return alert('No hay datos para exportar.');const headers=['c_Inventario','c_Serie','c_Equipo','c_Marca','c_Modelo','Puesto','Hostname','MAC'];const old={c_Inventario:'siaf',c_Serie:'serie',c_Equipo:'equipo',c_Marca:'marca',c_Modelo:'modelo',Puesto:'puesto',Hostname:'hostname',MAC:'mac'};const txt=[headers.join('\t'),...inventory.map(i=>headers.map(k=>String(i[k]??i[old[k]]??'').replace(/[\t\r\n]/g,' ')).join('\t'))].join('\n');download('\ufeff'+txt,'inventario_equipos.txt','text/plain;charset=utf-8;')}
+function download(content,name,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+renderTable();
+</script></body></html>
