@@ -1,412 +1,484 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario de Equipos - Escáner</title>
-    <!-- Tailwind CSS para diseño moderno -->
+    <title>Control de Inventario</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Librería Html5-Qrcode para escaneo de códigos de barra -->
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <!-- FontAwesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* Forzar mayúsculas en todos los inputs de texto */
         input[type="text"] {
             text-transform: uppercase;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen pb-20">
 
-    <!-- Header -->
-    <header class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-lg font-bold flex items-center gap-2">
-                <i class="fa-solid fa-barcode"></i> Control de Inventario
-            </h1>
-            <span id="counter" class="bg-indigo-700 text-xs px-2.5 py-1 rounded-full font-semibold">0 Registros</span>
+<body class="bg-gray-100 min-h-screen pb-10">
+
+<header class="bg-indigo-600 text-white p-4 shadow">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+        <h1 class="text-lg font-bold">
+            <i class="fa-solid fa-barcode"></i> Control de Inventario
+        </h1>
+        <span id="counter" class="bg-indigo-800 px-3 py-1 rounded-full text-sm">
+            0 registros
+        </span>
+    </div>
+</header>
+
+<main class="max-w-5xl mx-auto p-4 space-y-5">
+
+    <!-- ESCÁNER -->
+    <section class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-bold text-gray-700 mb-3">
+            <i class="fa-solid fa-camera text-indigo-600"></i>
+            Escáner de códigos
+        </h2>
+
+        <div class="flex flex-wrap gap-2 mb-3">
+            <button onclick="scanIntoField('inventario')"
+                class="bg-indigo-600 text-white rounded-lg px-4 py-2">
+                <i class="fa-solid fa-camera"></i>
+                Escanear SIAF
+            </button>
+
+            <button onclick="scanIntoField('serie')"
+                class="bg-blue-600 text-white rounded-lg px-4 py-2">
+                <i class="fa-solid fa-camera"></i>
+                Escanear serie
+            </button>
+
+            <button onclick="toggleScanner()"
+                id="btnToggleCam"
+                class="bg-gray-700 text-white rounded-lg px-4 py-2">
+                Iniciar cámara
+            </button>
         </div>
-    </header>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-6">
+        <div id="reader-container" class="hidden">
+            <div id="reader" class="w-full"></div>
+            <p class="text-sm text-gray-500 mt-2">
+                Coloca el código dentro del recuadro de la cámara.
+            </p>
+        </div>
 
-        <!-- Sección del Escáner de Cámara -->
-        <div class="bg-white rounded-2xl shadow-md p-4">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="font-bold text-gray-700 flex items-center gap-2">
-                    <i class="fa-solid fa-camera text-indigo-600"></i> Escáner de Códigos
-                </h2>
-                <button onclick="toggleScanner()" id="btnToggleCam" class="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-indigo-100 transition">
-                    <i class="fa-solid fa-power-off"></i> <span id="camBtnText">Iniciar Cámara</span>
+        <p id="scannerStatus" class="text-sm text-gray-600 mt-2">
+            Puedes escanear o escribir los códigos manualmente.
+        </p>
+    </section>
+
+    <!-- FORMULARIO -->
+    <section class="bg-white rounded-xl shadow p-4">
+        <h2 class="font-bold text-gray-700 mb-4">
+            <i class="fa-solid fa-pen-to-square text-indigo-600"></i>
+            Datos del equipo
+        </h2>
+
+        <form id="equipmentForm"
+              class="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">
+                    Código de inventario (SIAF)
+                </label>
+                <input id="inventario" type="text" required
+                    class="w-full border rounded-lg p-3"
+                    placeholder="Escanea o escribe el SIAF">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">
+                    Número de serie
+                </label>
+                <input id="serie" type="text" required
+                    class="w-full border rounded-lg p-3"
+                    placeholder="Escanea o escribe la serie">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">
+                    Equipo
+                </label>
+                <input id="equipo" type="text" required
+                    class="w-full border rounded-lg p-3"
+                    placeholder="Ej. LAPTOP, PC">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">
+                    Marca
+                </label>
+                <input id="marca" type="text" required
+                    class="w-full border rounded-lg p-3"
+                    placeholder="Ej. HP, DELL">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">
+                    Modelo
+                </label>
+                <input id="modelo" type="text" required
+                    class="w-full border rounded-lg p-3"
+                    placeholder="Modelo del equipo">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold mb-1">
+                    Puesto
+                </label>
+                <select id="puesto" required
+                    class="w-full border rounded-lg p-3 bg-white">
+                    <option value="">Selecciona un puesto</option>
+                    <option>CAJA</option>
+                    <option>BANQUERO</option>
+                    <option>EJECUTIVO</option>
+                    <option>GERENTE</option>
+                    <option>ADMINISTRATIVO</option>
+                    <option>OTRO</option>
+                </select>
+            </div>
+
+            <div class="md:col-span-2">
+                <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg p-3">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    Agregar a la tabla
                 </button>
             </div>
+        </form>
+    </section>
 
-            <!-- Contenedor de la cámara -->
-            <div id="reader-container" class="hidden mb-3">
-                <div id="reader" class="rounded-xl overflow-hidden border-2 border-indigo-100"></div>
-                <p class="text-xs text-center text-gray-500 mt-2">Enfoca el código de barras dentro del recuadro</p>
-            </div>
-
-            <!-- Selector de dónde se colocará el escaneo -->
-            <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100">
-                <label class="block text-xs font-bold text-indigo-900 mb-1 uppercase tracking-wider">
-                    ¿A qué campo enviar el código escaneado?
-                </label>
-                <div class="grid grid-cols-2 gap-2">
-                    <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-indigo-200 cursor-pointer shadow-sm">
-                        <input type="radio" name="targetField" value="serie" checked class="text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm font-bold text-gray-800">📷 Serie</span>
-                    </label>
-                    <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-indigo-200 cursor-pointer shadow-sm">
-                        <input type="radio" name="targetField" value="siaf" class="text-indigo-600 focus:ring-indigo-500">
-                        <span class="text-sm font-bold text-gray-800">📷 SIAF</span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Formulario de Registro -->
-        <div class="bg-white rounded-2xl shadow-md p-4">
-            <h2 class="font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Datos del Equipo (Todo en Mayúsculas)
+    <!-- REGISTROS -->
+    <section class="bg-white rounded-xl shadow p-4">
+        <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+            <h2 class="font-bold text-gray-700">
+                Equipos registrados
             </h2>
-            <form id="equipmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Equipo</label>
-                    <input type="text" id="equipo" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. LAPTOP, PC">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Marca</label>
-                    <input type="text" id="marca" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. HP, DELL">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Modelo</label>
-                    <input type="text" id="modelo" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. LATITUDE 3420">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Hostname</label>
-                    <input type="text" id="hostname" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. PC-OFFICE-01">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">MAC Address</label>
-                    <input type="text" id="mac" required class="w-full p-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="EJ. 00:1A:2B:3C:4D:5E">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1 text-indigo-700 flex justify-between">
-                        <span>N° Serie (Escaneable)</span>
-                        <i class="fa-solid fa-barcode"></i>
-                    </label>
-                    <input type="text" id="serie" required class="w-full p-2.5 border-2 border-indigo-200 bg-indigo-50/30 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ESCANEA O ESCRIBE">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1 text-indigo-700 flex justify-between">
-                        <span>Código SIAF (Escaneable)</span>
-                        <i class="fa-solid fa-barcode"></i>
-                    </label>
-                    <input type="text" id="siaf" required class="w-full p-2.5 border-2 border-indigo-200 bg-indigo-50/30 rounded-xl text-sm font-bold text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="ESCANEA O ESCRIBE">
-                </div>
 
-                <div class="md:col-span-2 pt-2">
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl shadow transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Agregar a la Tabla
-                    </button>
-                </div>
-            </form>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportToExcel()"
+                    class="bg-green-600 text-white px-3 py-2 rounded-lg">
+                    Exportar Excel
+                </button>
+
+                <button onclick="exportToTXT()"
+                    class="bg-blue-600 text-white px-3 py-2 rounded-lg">
+                    Exportar TXT
+                </button>
+
+                <button onclick="clearAllData()"
+                    class="bg-red-600 text-white px-3 py-2 rounded-lg">
+                    Limpiar todo
+                </button>
+            </div>
         </div>
 
-        <!-- Tabla de Registros -->
-        <div class="bg-white rounded-2xl shadow-md p-4">
-            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-4">
-                <h2 class="font-bold text-gray-700 flex items-center gap-2">
-                    <i class="fa-solid fa-table text-indigo-600"></i> Equipos Registrados
-                </h2>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="exportToExcelTable()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-excel"></i> Excel (.xls)
-                    </button>
-                    <button onclick="exportToTXT()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
-                        <i class="fa-solid fa-file-lines"></i> Texto (.txt)
-                    </button>
-                    <button onclick="clearAllData()" class="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-trash-can"></i> Limpiar
-                    </button>
-                </div>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2">c_Inventario</th>
+                        <th class="p-2">c_Serie</th>
+                        <th class="p-2">c_Equipo</th>
+                        <th class="p-2">c_Marca</th>
+                        <th class="p-2">c_Modelo</th>
+                        <th class="p-2">Puesto</th>
+                        <th class="p-2">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody"></tbody>
+            </table>
+        </div>
 
-            <!-- Tabla Adaptable -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 text-gray-600 text-xs uppercase border-b">
-                            <th class="p-2.5">Equipo / Marca</th>
-                            <th class="p-2.5">Modelo / Hostname</th>
-                            <th class="p-2.5">MAC</th>
-                            <th class="p-2.5 text-indigo-700">Serie</th>
-                            <th class="p-2.5 text-indigo-700">SIAF</th>
-                            <th class="p-2.5 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTableBody" class="divide-y text-sm text-gray-700">
-                        <!-- Datos cargados dinámicamente -->
+        <p id="emptyState" class="text-center text-gray-400 py-6">
+            No hay equipos registrados todavía.
+        </p>
+    </section>
+
+</main>
+
+<script>
+    let scanner = null;
+    let isScanning = false;
+    let targetField = "inventario";
+
+    let inventory = JSON.parse(
+        localStorage.getItem("inventory_data") || "[]"
+    );
+
+    // Convertir texto a mayúsculas
+    document.querySelectorAll('input[type="text"]').forEach(input => {
+        input.addEventListener("input", function () {
+            this.value = this.value.toUpperCase();
+        });
+    });
+
+    // Seleccionar el campo al que llegará el escaneo
+    async function scanIntoField(fieldId) {
+        targetField = fieldId;
+
+        document.getElementById("scannerStatus").textContent =
+            fieldId === "inventario"
+                ? "Escaneando código de inventario (SIAF)..."
+                : "Escaneando número de serie...";
+
+        if (!isScanning) {
+            await toggleScanner();
+        }
+    }
+
+    // Iniciar o detener cámara
+    async function toggleScanner() {
+        const container = document.getElementById("reader-container");
+        const button = document.getElementById("btnToggleCam");
+
+        if (isScanning) {
+            try {
+                if (scanner) {
+                    await scanner.stop();
+                    scanner.clear();
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+
+            scanner = null;
+            isScanning = false;
+            container.classList.add("hidden");
+            button.textContent = "Iniciar cámara";
+            document.getElementById("scannerStatus").textContent =
+                "Cámara detenida.";
+            return;
+        }
+
+        if (!window.isSecureContext) {
+            alert("Abre esta aplicación mediante HTTPS o localhost para usar la cámara.");
+            return;
+        }
+
+        container.classList.remove("hidden");
+        button.textContent = "Deteniendo...";
+
+        try {
+            scanner = new Html5Qrcode("reader");
+
+            await scanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 280, height: 120 }
+                },
+                decodedText => {
+                    const input = document.getElementById(targetField);
+                    input.value = decodedText.toUpperCase();
+                    input.dispatchEvent(new Event("input", { bubbles: true }));
+
+                    document.getElementById("scannerStatus").textContent =
+                        "Código capturado correctamente.";
+
+                    if (navigator.vibrate) navigator.vibrate(150);
+
+                    // Detener cámara después de capturar un código
+                    toggleScanner();
+                },
+                () => {}
+            );
+
+            isScanning = true;
+            button.textContent = "Detener cámara";
+        } catch (error) {
+            scanner = null;
+            isScanning = false;
+            container.classList.add("hidden");
+            button.textContent = "Iniciar cámara";
+
+            alert(
+                "No se pudo abrir la cámara. Permite el acceso en el navegador y utiliza HTTPS o localhost."
+            );
+            console.error(error);
+        }
+    }
+
+    // Registrar equipo
+    document.getElementById("equipmentForm").addEventListener("submit", event => {
+        event.preventDefault();
+
+        const item = {
+            id: Date.now(),
+            inventario: document.getElementById("inventario").value.trim().toUpperCase(),
+            serie: document.getElementById("serie").value.trim().toUpperCase(),
+            equipo: document.getElementById("equipo").value.trim().toUpperCase(),
+            marca: document.getElementById("marca").value.trim().toUpperCase(),
+            modelo: document.getElementById("modelo").value.trim().toUpperCase(),
+            puesto: document.getElementById("puesto").value.trim().toUpperCase()
+        };
+
+        inventory.unshift(item);
+        saveAndRefresh();
+        event.target.reset();
+
+        document.getElementById("scannerStatus").textContent =
+            "Equipo agregado correctamente.";
+    });
+
+    // Guardar en el navegador
+    function saveAndRefresh() {
+        localStorage.setItem("inventory_data", JSON.stringify(inventory));
+        renderTable();
+    }
+
+    // Mostrar registros
+    function renderTable() {
+        const tbody = document.getElementById("inventoryTableBody");
+        const empty = document.getElementById("emptyState");
+
+        document.getElementById("counter").textContent =
+            inventory.length + " registros";
+
+        tbody.replaceChildren();
+
+        empty.style.display = inventory.length ? "none" : "block";
+
+        inventory.forEach(item => {
+            const tr = document.createElement("tr");
+            tr.className = "border-b";
+
+            const values = [
+                item.inventario || item.siaf || "",
+                item.serie || "",
+                item.equipo || "",
+                item.marca || "",
+                item.modelo || "",
+                item.puesto || ""
+            ];
+
+            values.forEach(value => {
+                const td = document.createElement("td");
+                td.className = "p-2";
+                td.textContent = value || "---";
+                tr.appendChild(td);
+            });
+
+            const action = document.createElement("td");
+            action.className = "p-2";
+
+            const button = document.createElement("button");
+            button.textContent = "Eliminar";
+            button.className = "bg-red-100 text-red-700 rounded px-2 py-1";
+            button.onclick = () => deleteItem(item.id);
+
+            action.appendChild(button);
+            tr.appendChild(action);
+            tbody.appendChild(tr);
+        });
+    }
+
+    function deleteItem(id) {
+        if (!confirm("¿Deseas eliminar este equipo?")) return;
+
+        inventory = inventory.filter(item => item.id !== id);
+        saveAndRefresh();
+    }
+
+    function clearAllData() {
+        if (!confirm("¿Deseas borrar todo el inventario guardado?")) return;
+
+        inventory = [];
+        saveAndRefresh();
+    }
+
+    // Descargar archivo Excel compatible
+    function exportToExcel() {
+        if (!inventory.length) {
+            alert("No hay datos para exportar.");
+            return;
+        }
+
+        const headers = [
+            "c_Inventario", "c_Serie", "c_Equipo",
+            "c_Marca", "c_Modelo", "Puesto"
+        ];
+
+        const rows = inventory.map(item => [
+            item.inventario || item.siaf || "",
+            item.serie || "",
+            item.equipo || "",
+            item.marca || "",
+            item.modelo || "",
+            item.puesto || ""
+        ]);
+
+        const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+
+        const html = `
+            <html>
+            <head><meta charset="UTF-8"></head>
+            <body>
+                <table border="1">
+                    <thead><tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr></thead>
+                    <tbody>
+                        ${rows.map(row =>
+                            `<tr>${row.map(value => `<td>${escapeHtml(value)}</td>`).join("")}</tr>`
+                        ).join("")}
                     </tbody>
                 </table>
-            </div>
-            <div id="emptyState" class="text-center py-8 text-gray-400 text-sm">
-                <i class="fa-solid fa-box-open text-3xl mb-2 block"></i>
-                No hay equipos registrados todavía.
-            </div>
-        </div>
+            </body>
+            </html>`;
 
-    </main>
+        downloadFile(
+            html,
+            "inventario_equipos.xls",
+            "application/vnd.ms-excel;charset=utf-8;"
+        );
+    }
 
-    <!-- Script de Lógica -->
-    <script>
-        let html5QrCode = null;
-        let isScanning = false;
-        let inventory = JSON.parse(localStorage.getItem('inventory_data')) || [];
+    // Descargar archivo de texto
+    function exportToTXT() {
+        if (!inventory.length) {
+            alert("No hay datos para exportar.");
+            return;
+        }
 
-        renderTable();
+        let content = "c_Inventario\tc_Serie\tc_Equipo\tc_Marca\tc_Modelo\tPuesto\n";
 
-        // Forzar mayúsculas automáticamente en tiempo real mientras se escribe
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
-            });
+        inventory.forEach(item => {
+            content += [
+                item.inventario || item.siaf || "",
+                item.serie || "",
+                item.equipo || "",
+                item.marca || "",
+                item.modelo || "",
+                item.puesto || ""
+            ].join("\t") + "\n";
         });
 
-        // Manejar Escáner de Cámara
-        async function toggleScanner() {
-            const container = document.getElementById('reader-container');
-            const btnText = document.getElementById('camBtnText');
+        downloadFile(content, "inventario_equipos.txt", "text/plain;charset=utf-8;");
+    }
 
-            if (!isScanning) {
-                container.classList.remove('hidden');
-                btnText.textContent = "Detener Cámara";
-                isScanning = true;
+    function downloadFile(content, filename, type) {
+        const blob = new Blob([content], { type });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
 
-                html5QrCode = new Html5Qrcode("reader");
-                try {
-                    await html5QrCode.start(
-                        { facingMode: "environment" },
-                        { fps: 10, qrbox: { width: 250, height: 100 } },
-                        (decodedText) => {
-                            handleSuccessfulScan(decodedText.toUpperCase());
-                        },
-                        (errorMessage) => {}
-                    );
-                } catch (err) {
-                    alert("No se pudo iniciar la cámara. Verifica los permisos o el protocolo.");
-                    toggleScanner();
-                }
-            } else {
-                if (html5QrCode) {
-                    await html5QrCode.stop();
-                    html5QrCode.clear();
-                }
-                container.classList.add('hidden');
-                btnText.textContent = "Iniciar Cámara";
-                isScanning = false;
-            }
-        }
+        link.href = url;
+        link.download = filename;
+        link.click();
 
-        // Al escanear con éxito
-        function handleSuccessfulScan(code) {
-            const selectedTarget = document.querySelector('input[name="targetField"]:checked').value;
-            const targetInput = document.getElementById(selectedTarget);
-            
-            if (targetInput) {
-                targetInput.value = code.toUpperCase();
-                
-                targetInput.classList.add('bg-green-100', 'border-green-500');
-                setTimeout(() => {
-                    targetInput.classList.remove('bg-green-100', 'border-green-500');
-                }, 1000);
+        URL.revokeObjectURL(url);
+    }
 
-                if (navigator.vibrate) navigator.vibrate(150);
-                playBeep();
-            }
-        }
+    renderTable();
+</script>
 
-        // Audio de éxito
-        function playBeep() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 600;
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.1);
-            } catch(e) {}
-        }
-
-        // Agregar registro
-        document.getElementById('equipmentForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const newItem = {
-                id: Date.now(),
-                equipo: document.getElementById('equipo').value.trim().toUpperCase(),
-                marca: document.getElementById('marca').value.trim().toUpperCase(),
-                modelo: document.getElementById('modelo').value.trim().toUpperCase(),
-                hostname: document.getElementById('hostname').value.trim().toUpperCase(),
-                mac: document.getElementById('mac').value.trim().toUpperCase(),
-                serie: document.getElementById('serie').value.trim().toUpperCase(),
-                siaf: document.getElementById('siaf').value.trim().toUpperCase()
-            };
-
-            inventory.unshift(newItem);
-            saveAndRefresh();
-            document.getElementById('equipmentForm').reset();
-        });
-
-        function saveAndRefresh() {
-            localStorage.setItem('inventory_data', JSON.stringify(inventory));
-            renderTable();
-        }
-
-        // Renderizar tabla
-        function renderTable() {
-            const tbody = document.getElementById('inventoryTableBody');
-            const emptyState = document.getElementById('emptyState');
-            const counter = document.getElementById('counter');
-
-            counter.textContent = `${inventory.length} Registros`;
-
-            if (inventory.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-
-            emptyState.classList.add('hidden');
-            tbody.innerHTML = inventory.map(item => `
-                <tr class="hover:bg-gray-50 transition border-b">
-                    <td class="p-2.5">
-                        <div class="font-bold text-gray-900">${item.equipo}</div>
-                        <div class="text-xs text-gray-500">${item.marca}</div>
-                    </td>
-                    <td class="p-2.5">
-                        <div class="text-gray-800">${item.modelo}</div>
-                        <div class="text-xs text-indigo-600 font-medium">${item.hostname}</div>
-                    </td>
-                    <td class="p-2.5 font-mono text-xs text-gray-600">${item.mac}</td>
-                    <td class="p-2.5 font-bold font-mono text-indigo-900">${item.serie}</td>
-                    <td class="p-2.5 font-bold font-mono text-indigo-900">${item.siaf}</td>
-                    <td class="p-2.5 text-center">
-                        <button onclick="deleteItem(${item.id})" class="text-red-500 hover:text-red-700 p-1.5 transition">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function deleteItem(id) {
-            if (confirm("¿Estás seguro de eliminar este equipo?")) {
-                inventory = inventory.filter(item => item.id !== id);
-                saveAndRefresh();
-            }
-        }
-
-        function clearAllData() {
-            if (confirm("¿Deseas borrar todo el inventario guardado?")) {
-                inventory = [];
-                saveAndRefresh();
-            }
-        }
-
-        // Exportar como Tabla de Excel real (.xls)
-        function exportToExcelTable() {
-            if (inventory.length === 0) {
-                alert("No hay datos para exportar.");
-                return;
-            }
-
-            let htmlContent = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-                <head>
-                    <meta charset="UTF-8">
-                    <style>
-                        table { border-collapse: collapse; width: 100%; }
-                        th, td { border: 1px solid black; padding: 8px; text-align: left; mso-number-format:"\\@"; }
-                        th { background-color: #4F46E5; color: white; font-weight: bold; }
-                    </style>
-                </head>
-                <body>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>EQUIPO</th>
-                                <th>MARCA</th>
-                                <th>MODELO</th>
-                                <th>HOSTNAME</th>
-                                <th>MAC</th>
-                                <th>SERIE</th>
-                                <th>SIAF</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            inventory.forEach(item => {
-                htmlContent += `
-                    <tr>
-                        <td>${item.equipo}</td>
-                        <td>${item.marca}</td>
-                        <td>${item.modelo}</td>
-                        <td>${item.hostname}</td>
-                        <td>${item.mac}</td>
-                        <td>${item.serie}</td>
-                        <td>${item.siaf}</td>
-                    </tr>
-                `;
-            });
-
-            htmlContent += `
-                        </tbody>
-                    </table>
-                </body>
-                </html>
-            `;
-
-            const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inventario_equipos_${new Date().toISOString().slice(0,10)}.xls`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-
-        // Exportar como Archivo de Texto (.txt) ordenado en formato de tabla de texto
-        function exportToTXT() {
-            if (inventory.length === 0) {
-                alert("No hay datos para exportar.");
-                return;
-            }
-
-            // Encabezados tabulados o separados por espacios limpios
-            let txtContent = "EQUIPO\tMARCA\tMODELO\tHOSTNAME\tMAC\tSERIE\tSIAF\n";
-            
-            inventory.forEach(item => {
-                txtContent += `${item.equipo}\t${item.marca}\t${item.modelo}\t${item.hostname}\t${item.mac}\t${item.serie}\t${item.siaf}\n`;
-            });
-
-            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `inventario_equipos_${new Date().toISOString().slice(0,10)}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
-    </script>
 </body>
 </html>
